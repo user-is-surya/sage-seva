@@ -5,7 +5,8 @@
 |---|---|
 | **Event** | HackWithAditya 2026, Aditya University, Level 1 prototype screening |
 | **Track** | AI for Bharat: agents, RAG, Telugu/Hindi voice AI, computer vision |
-| **Team** | _[Team name]_: _[Member names]_ |
+| **Team** | The Codefathers: Surya B (lead), P Nithish, Jishnu Vardan Sai S R, Lishanthika S, Neha Kesav R |
+| **Institution** | Chennai Institute of Technology |
 | **Repository** | https://github.com/user-is-surya/sage-seva |
 | **Status** | Working prototype on a mock income-certificate portal with synthetic documents |
 
@@ -166,10 +167,11 @@ Tokens are aligned while allowing for word order, joined words (Subba Rao / Subb
 
 | Member | Role |
 |---|---|
-| _[Name]_ (lead) | Architecture, backend agent, consent and audit |
-| _[Name]_ | Name guard and evaluation |
-| _[Name]_ | Frontend, accessibility, i18n |
-| _[Name]_ | Mock portal, samples, testing, demo |
+| Surya B (lead) | Architecture, backend agent, consent and audit, frontend |
+| P Nithish | Name guard and evaluation |
+| Jishnu Vardan Sai S R | Frontend, accessibility, languages |
+| Lishanthika S | Mock portal and sample documents |
+| Neha Kesav R | Testing, demo video and documentation |
 
 **Provenance.** SAGE Seva is derived from S.A.G.E, the lead's earlier personal assistant. The permission gate, the audit-log design, the Playwright tool pattern, provider failover and the Orb UI were carried over and adapted. The name guard, hash-bound consent, hash chain, read-back, skill packs, portal, multilingual UI and evaluation are new.
 

@@ -107,10 +107,12 @@ Voice browser agents already exist. The closest is SAHAY, an open-source Gemini 
 8. **Security hardening:** persistent consent store, signed chain anchors, and role-based access.
 
 ## Team work split
-- _[Member 1, team lead]_: architecture, backend agent, consent and audit design.
-- _[Member 2]_: name guard rules and evaluation set.
-- _[Member 3]_: frontend UI, accessibility, multilingual strings.
-- _[Member 4]_: mock portal, sample documents, testing, demo video.
+Team: The Codefathers, Chennai Institute of Technology.
+- Surya B (lead): architecture, backend agent, consent and audit design, frontend.
+- P Nithish: name guard rules and evaluation set.
+- Jishnu Vardan Sai S R: frontend UI, accessibility, multilingual strings.
+- Lishanthika S: mock portal and sample documents.
+- Neha Kesav R: testing, demo video and documentation.
 
 (Edit names and roles before submitting.)
 
