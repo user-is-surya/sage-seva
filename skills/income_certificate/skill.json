@@ -1,0 +1,32 @@
+{
+  "id": "income_certificate",
+  "title": {
+    "en": "Income Certificate",
+    "te": "ఆదాయ ధృవీకరణ పత్రం",
+    "ta": "வருமானச் சான்றிதழ்",
+    "hi": "आय प्रमाण पत्र"
+  },
+  "portal_url": "/portal/income-certificate",
+  "submit_button": "#submit-btn",
+  "fields": [
+    {"id": "applicant_name", "label": "Applicant name (as in ID)", "source": "guard:name_latin", "required": true},
+    {"id": "father_name", "label": "Father's / spouse name", "source": "guard:father_name_latin", "required": true},
+    {"id": "dob", "label": "Date of birth (DD/MM/YYYY)", "source": "doc:dob", "required": true},
+    {"id": "gender", "label": "Gender", "source": "doc:gender", "required": true, "type": "select", "options": ["Male", "Female", "Other"]},
+    {"id": "address", "label": "Address", "source": "doc:address", "required": true},
+    {"id": "district", "label": "District", "source": "doc:district", "required": true},
+    {"id": "state", "label": "State", "source": "doc:state", "required": true},
+    {"id": "id_last4", "label": "ID number (last 4 digits only)", "source": "doc:id_last4", "required": true},
+    {"id": "occupation", "label": "Occupation", "source": "voice:occupation", "required": true},
+    {"id": "annual_income", "label": "Annual family income (₹)", "source": "voice:annual_income", "required": true},
+    {"id": "purpose", "label": "Purpose of certificate", "source": "voice:purpose", "required": true},
+    {"id": "mobile", "label": "Mobile number", "source": "voice:mobile", "required": false}
+  ],
+  "voice_slots": {
+    "occupation": "the applicant's occupation (e.g. farmer, daily wage worker, teacher)",
+    "annual_income": "total annual family income in rupees as a plain integer (e.g. 'one lakh twenty thousand' -> 120000)",
+    "purpose": "why the certificate is needed (e.g. scholarship, fee reimbursement, loan, scheme application)",
+    "mobile": "10-digit mobile number if spoken"
+  },
+  "knowledge": "knowledge.md"
+}
