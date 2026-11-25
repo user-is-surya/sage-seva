@@ -12,16 +12,16 @@
   --warn: oklch(0.82 0.14 75);
   --danger: oklch(0.68 0.19 22);
   --text: oklch(0.92 0.012 255);
-  --text-dim: oklch(0.92 0.012 255 / 0.62);
+  --text-dim: oklch(0.92 0.012 255 / 0.78); /* raised for 4.5:1 on panels */
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-ui: "Inter", "Noto Sans Telugu", "Noto Sans Tamil", "Noto Sans Devanagari", "Nirmala UI", system-ui, sans-serif;
+  --font-ui: "Atkinson Hyperlegible", "Inter", "Noto Sans Telugu", "Noto Sans Tamil", "Noto Sans Devanagari", "Nirmala UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
-  --fs: 14px;
+  --fs: 16px;
 }
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--text); font-family: var(--font-ui); font-size: var(--fs); }
-.app.big { --fs: 17px; }
+.app.big { --fs: 19px; }
 button, input { font-family: inherit; font-size: inherit; }
 
 .sage-ground { position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -140,3 +140,26 @@ button, input { font-family: inherit; font-size: inherit; }
 .err { color: var(--danger); margin-top: 10px; }
 
 @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; height: auto; } }
+
+/* ---------- accessibility pass (ui-ux-pro-max: Accessible & Ethical) ---------- */
+body { line-height: 1.5; }
+button, .btn, .ghost, .langs button, .mic, .typer button, .typer input, .slots input, .codein { min-height: 44px; }
+.btn, .ghost, .mic, .chain { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.chain { min-height: 36px; }
+.btn.small { min-height: 36px; }
+:focus-visible { outline: 3px solid oklch(0.85 0.15 210); outline-offset: 2px; border-radius: 8px; }
+input:focus-visible { outline-offset: 0; }
+.panel h2 { letter-spacing: .08em; font-size: .9em; }
+.msg { font-size: 1em; }
+.err { display: flex; gap: 8px; align-items: center; justify-content: center; }
+.sheet h2 { display: flex; gap: 10px; align-items: center; justify-content: center; }
+.card h3 { font-size: 1.05em; }
+.howto { list-style: none; padding: 0; margin: 14px 0 2px; display: grid; gap: 8px; color: var(--text-dim); }
+.howto li { display: flex; gap: 10px; align-items: center; }
+.howto b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: oklch(0.74 0.15 210 / .15); color: var(--accent); font-size: .85em; }
+.btn:hover:not(:disabled), .ghost:hover, .langs button:hover { border-color: var(--accent); color: var(--text); }
+.btn, .ghost, .langs button, .mic { transition: border-color .15s ease, background-color .15s ease, color .15s ease; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

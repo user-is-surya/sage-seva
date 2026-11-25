@@ -159,14 +159,33 @@ Do not guess fields that are not printed; leave them empty."""
 @app.post("/api/extract")
 async def extract(image: UploadFile = File(...), lang: str = Form("te")):
     data = await image.read()
-    try:
-        out = await asyncio.to_thread(ai.ask_json, EXTRACT_SYSTEM, "Extract the fields from this document.",
-                                      [(data, image.content_type or "image/png")])
-    except Exception as e:  # noqa: BLE001
-        return err(e)
-    digits = re.sub(r"\D", "", out.get("id_number", "") or "")
-    out["id_last4"] = digits[-4:] if len(digits) >= 4 else ""
+    # Same photo -> same result: cache by content hash (saves quota, survives model overload)
+    import hashlib
+    cache = config.DATA_DIR / "extract_cache"
+    cache.mkdir(exist_ok=True)
+    cfile = cache / (hashlib.sha256(data).hexdigest() + ".json")
+    out = None
+    if cfile.exists():
+        out = json.loads(cfile.read_text(encoding="utf-8"))
+    else:
+        last = None
+        for attempt in range(2):  # one retry after a short pause if every model was busy
+            try:
+                out = await asyncio.to_thread(ai.ask_json, EXTRACT_SYSTEM, "Extract the fields from this document.",
+                                              [(data, image.content_type or "image/png")])
+                break
+            except Exception as e:  # noqa: BLE001
+                last = e
+                ai._cooldown.clear()
+                await asyncio.sleep(2)
+        if out is None:
+            return err(last)
+    if "id_last4" not in out:
+        digits = re.sub(r"\D", "", out.get("id_number", "") or "")
+        out["id_last4"] = digits[-4:] if len(digits) >= 4 else ""
     out["id_number"] = audit.mask(out.get("id_number", ""))  # never keep full ID numbers
+    if out.get("name_latin") and not cfile.exists():
+        cfile.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")  # masked before caching
     out["engine"] = ai.last_used.get("text")
     audit.record("document_read", {"doc_type": out.get("doc_type"), "name_latin": out.get("name_latin"),
                                    "file": image.filename}, "agent")

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Orb, { type VoiceState } from "./components/Orb";
 import { api, Recorder, speak } from "./api";
 import { EVENT_LABEL, LANGS, t, type Lang } from "./i18n";
+import Icon from "./components/Icon";
 
 type Msg = { who: "you" | "seva"; text: string; meta?: string };
 type Doc = Record<string, any> & { thumb?: string; file?: string };
@@ -222,8 +223,8 @@ export default function App() {
               <button key={l.id} className={l.id === lang ? "on" : ""} onClick={() => setLang(l.id)}>{l.label}</button>
             ))}
           </div>
-          <button className="ghost" onClick={() => setBig(!big)}>{L("bigText")}</button>
-          <span className={`chain ${v.ok ? "ok" : "bad"}`}>{v.ok ? "⛓ " + L("chainOk") : "⚠ " + L("chainBroken")} · {v.count} {L("entries")}</span>
+          <button className="ghost" aria-pressed={big} onClick={() => setBig(!big)}><Icon name="text" /> {L("bigText")}</button>
+          <span className={`chain ${v.ok ? "ok" : "bad"}`} role="status"><Icon name={v.ok ? "chain" : "alert"} /> {v.ok ? L("chainOk") : L("chainBroken")} · {v.count} {L("entries")}</span>
           <button className="ghost" onClick={newSession}>{L("newSession")}</button>
         </div>
       </header>
@@ -232,13 +233,13 @@ export default function App() {
         {/* ------------------------------------------------ assistant */}
         <section className="panel assistant">
           <h2>{L("assistant")}</h2>
-          <div className="orb-wrap" onClick={toggleMic}>
+          <div className="orb-wrap" onClick={toggleMic} aria-hidden="true">
             <Orb state={voice} level={level} />
           </div>
           <button className={`mic ${voice}`} onClick={toggleMic} disabled={voice === "thinking" || voice === "speaking"}>
-            {voice === "listening" ? "■ " + L("listening") : voice === "thinking" ? L("thinking") : "🎙 " + L("tapToSpeak")}
+            {voice === "listening" ? <><Icon name="stop" /> {L("listening")}</> : voice === "thinking" ? L("thinking") : <><Icon name="mic" /> {L("tapToSpeak")}</>}
           </button>
-          <div className="chat">
+          <div className="chat" aria-live="polite">
             {msgs.map((m, i) => (
               <div key={i} className={`msg ${m.who}`}>
                 <div>{m.text}</div>
@@ -247,7 +248,7 @@ export default function App() {
             ))}
           </div>
           <form className="typer" onSubmit={(e) => { e.preventDefault(); const x = typed; setTyped(""); handleText(x); }}>
-            <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={L("typeHere")} />
+            <input aria-label={L("typeHere")} value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={L("typeHere")} />
             <button>{L("send")}</button>
           </form>
         </section>
@@ -263,15 +264,22 @@ export default function App() {
 
           <div className="card">
             <div className="row">
-              <label className="btn">{L("addDocs")}<input type="file" accept="image/*" multiple hidden onChange={onPick} /></label>
-              <button className="btn ghost" onClick={useSamples}>{L("useSamples")}</button>
+              <label className="btn"><Icon name="upload" /> {L("addDocs")}<input type="file" accept="image/*" multiple hidden onChange={onPick} /></label>
+              <button className="btn ghost" onClick={useSamples}><Icon name="doc" /> {L("useSamples")}</button>
               {reading > 0 && <span className="pulse">{L("reading")} ({reading})</span>}
             </div>
+            {docs.length === 0 && reading === 0 && (
+              <ol className="howto">
+                <li><b>1</b>Add photos of the applicant's documents (or use the samples).</li>
+                <li><b>2</b>Speak or type the details: occupation, income, purpose.</li>
+                <li><b>3</b>Check the name spelling, fill the form, then confirm with the spoken code.</li>
+              </ol>
+            )}
             {docs.length > 0 && (
               <div className="docs">
                 {docs.map((d, i) => (
                   <div className="doc" key={i}>
-                    {d.thumb && <img src={d.thumb} alt="" />}
+                    {d.thumb && <img src={d.thumb} alt={`Photo of ${d.label || "document"}`} />}
                     <div>
                       <div className="dlabel">{d.label || d.doc_type}</div>
                       <div className="dname">{d.name_native}</div>
@@ -298,7 +306,8 @@ export default function App() {
                     <tr key={i}>
                       <td>{x.label}{x.primary && <em> · {L("primary")}</em>}</td>
                       <td className="mono">
-                        {x.diff?.length ? x.diff.map((d: any, j: number) => (
+                        {x.diff?.length ? x.diff.filter((d: any) => d.found !== null || !x.diff.some((o: any) =>
+                          o.found && d.expected && o.found.toLowerCase().includes(d.expected.toLowerCase()))).map((d: any, j: number) => (
                           <span key={j} className={d.same ? "same" : "diff"} title={d.expected ? `expected ${d.expected}` : "extra"}>{d.found ?? `∅(${d.expected})`} </span>
                         )) : x.value}
                       </td>
@@ -310,7 +319,7 @@ export default function App() {
               <div className="spell">
                 <span className="k">{L("spellBack")}</span>
                 <span className="v">{guard.name.spell_back}</span>
-                <button className="btn small" onClick={() => say(guard.spoken)}>▶ {L("play")}</button>
+                <button className="btn small" onClick={() => say(guard.spoken)}><Icon name="play" size={14} /> {L("play")}</button>
               </div>
               {guard.father?.canonical && <div className="minor">Father: <b>{guard.father.canonical}</b> · <span className={`chip ${guard.father.status === "consistent" ? "ok" : "warn"}`}>{guard.father.status}</span> · DOB {guard.dob?.consistent ? "✓ consistent" : "⚠ differs"}</div>}
             </div>
@@ -326,8 +335,8 @@ export default function App() {
               ))}
             </div>
             <div className="row">
-              <button className="btn ghost" onClick={() => askDocs()} disabled={busy === "ask"}>❓ {L("askDocs")}</button>
-              <button className="btn" onClick={doFill} disabled={!docs.length || busy === "fill"}>{busy === "fill" ? "…" : "✎ " + L("fill")}</button>
+              <button className="btn ghost" onClick={() => askDocs()} disabled={busy === "ask"}><Icon name="help" /> {L("askDocs")}</button>
+              <button className="btn" onClick={doFill} disabled={!docs.length || busy === "fill"}>{busy === "fill" ? L("thinking") : <><Icon name="pen" /> {L("fill")}</>}</button>
             </div>
             {answer && (
               <div className="answer">
@@ -340,7 +349,7 @@ export default function App() {
 
           {readBack && (
             <div className="card">
-              <h3>{L("readBack")} {readBack.all_match ? <span className="chip ok">✓ all match</span> : <span className="chip warn">check</span>}</h3>
+              <h3>{L("readBack")} {readBack.all_match ? <span className="chip ok"><Icon name="check" size={13} /> all match</span> : <span className="chip warn">check</span>}</h3>
               <table className="rb">
                 <thead><tr><th></th><th>{L("intended")}</th><th>{L("onPage")}</th><th></th></tr></thead>
                 <tbody>
@@ -351,13 +360,13 @@ export default function App() {
                   ))}
                 </tbody>
               </table>
-              {!result && <button className="btn primary" onClick={startConsent} disabled={busy === "consent"}>🔒 {L("submit")}</button>}
+              {!result && <button className="btn primary" onClick={startConsent} disabled={busy === "consent"}><Icon name="lock" /> {L("submit")}</button>}
             </div>
           )}
 
           {result && (
             <div className="card success">
-              <h3>✓ {L("submitted")}</h3>
+              <h3><Icon name="check" /> {L("submitted")}</h3>
               <div className="appno">{result.application_no}</div>
             </div>
           )}
@@ -366,8 +375,8 @@ export default function App() {
         {/* ------------------------------------------------ receipts */}
         <section className="panel receipts">
           <h2>{L("receipts")}</h2>
-          <button className="btn small ghost" onClick={refreshAudit}>↻ {L("verify")}</button>
-          <div className={`verify ${v.ok ? "ok" : "bad"}`}>
+          <button className="btn small ghost" onClick={refreshAudit}><Icon name="refresh" size={14} /> {L("verify")}</button>
+          <div className={`verify ${v.ok ? "ok" : "bad"}`} role="status" aria-live="polite">
             {v.ok ? `⛓ ${L("chainOk")} · ${v.count}` : `⚠ ${L("chainBroken")} @ #${v.broken_at}: ${v.reason}`}
             {v.head && <div className="mono small">head {String(v.head).slice(0, 16)}…</div>}
           </div>
@@ -390,22 +399,22 @@ export default function App() {
       </main>
 
       {consent && (
-        <div className="modal">
+        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="consent-title">
           <div className="sheet">
-            <h2>🔒 {L("consentTitle")}</h2>
-            <p className="spoken">{consent.spoken}</p>
+            <h2><Icon name="shield" size={22} /> {L("consentTitle")}</h2>
+            <p className="spoken" id="consent-title">{consent.spoken}</p>
             <div className="code-label">{L("sayCode")}</div>
             <div className="code">{consent.code}</div>
             <div className="mono small">action hash {String(consent.action_hash).slice(0, 24)}…</div>
             <div className="row center">
-              <button className={`mic ${voice}`} onClick={toggleMic}>{voice === "listening" ? "■ " + L("listening") : "🎙 " + L("tapToSpeak")}</button>
+              <button className={`mic ${voice}`} onClick={toggleMic}>{voice === "listening" ? <><Icon name="stop" /> {L("listening")}</> : <><Icon name="mic" /> {L("tapToSpeak")}</>}</button>
             </div>
             <form className="row center" onSubmit={(e) => { e.preventDefault(); confirmConsent(codeInput, "typed"); }}>
-              <input className="codein" value={codeInput} onChange={(e) => setCodeInput(e.target.value)} placeholder={L("orType")} inputMode="numeric" maxLength={4} />
+              <input className="codein" value={codeInput} onChange={(e) => setCodeInput(e.target.value)} aria-label={L("orType")} placeholder={L("orType")} inputMode="numeric" maxLength={4} />
               <button className="btn primary" disabled={busy === "verify"}>{L("confirm")}</button>
               <button type="button" className="btn ghost" onClick={() => setConsent(null)}>{L("cancel")}</button>
             </form>
-            {consentErr && <div className="err">{consentErr}</div>}
+            {consentErr && <div className="err" role="alert"><Icon name="alert" /> {consentErr}</div>}
           </div>
         </div>
       )}
