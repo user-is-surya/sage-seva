@@ -15,8 +15,13 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
-DATA_DIR = ROOT / "data"
-DATA_DIR.mkdir(exist_ok=True)
+_dd = os.getenv("SEVA_DATA_DIR", "").strip()
+DATA_DIR = (Path(_dd) if Path(_dd).is_absolute() else ROOT / _dd) if _dd else ROOT / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    PORT = int(os.getenv("SEVA_PORT", "8000"))
+except ValueError:
+    PORT = 8000
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()

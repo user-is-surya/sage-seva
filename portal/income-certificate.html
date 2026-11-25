@@ -5,87 +5,504 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Income Certificate — Seva Sandbox Portal (MOCK)</title>
 <style>
-  :root { --ink:#1d2433; --muted:#5b6475; --line:#d6dbe4; --accent:#0b5cad; --warn:#9a3412; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: "Segoe UI", "Nirmala UI", system-ui, sans-serif; color:var(--ink); background:#f3f5f8; }
-  .mock { background:#fff4e5; color:var(--warn); text-align:center; font-size:13px; padding:6px; border-bottom:1px solid #f3d3a8; font-weight:600; }
-  header { background:#fff; border-bottom:3px solid var(--accent); padding:14px 28px; display:flex; align-items:center; gap:14px; }
-  .seal { width:42px; height:42px; border-radius:50%; border:2px solid var(--accent); display:grid; place-items:center; color:var(--accent); font-weight:700; }
-  header h1 { font-size:20px; margin:0; } header p { margin:2px 0 0; color:var(--muted); font-size:13px; }
-  main { max-width: 880px; margin: 24px auto; background:#fff; border:1px solid var(--line); border-radius:8px; padding: 22px 28px 28px; }
-  h2 { font-size:18px; margin:0 0 4px; } .sub { color:var(--muted); font-size:13px; margin-bottom:18px; }
-  .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
-  .full { grid-column: 1 / -1; }
-  label { display:block; font-size:13px; font-weight:600; margin-bottom:5px; }
-  label .req { color:#b91c1c; }
-  input, select, textarea { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:5px; font-size:14px; font-family:inherit; }
-  input:focus, select:focus, textarea:focus { outline:2px solid #9cc3ec; border-color:var(--accent); }
-  .filled { background:#f0f7ff; }
-  .decl { margin-top:18px; font-size:13px; color:var(--muted); display:flex; gap:8px; align-items:flex-start; }
-  .decl input { width:auto; margin-top:2px; }
-  .actions { margin-top:20px; display:flex; gap:12px; }
-  button { padding:10px 20px; border-radius:5px; border:1px solid var(--accent); background:var(--accent); color:#fff; font-weight:600; cursor:pointer; }
-  button.secondary { background:#fff; color:var(--accent); }
-  .ok { max-width:880px; margin:24px auto; background:#ecfdf3; border:1px solid #a7e3bf; border-radius:8px; padding:22px 28px; }
-  .ok h2 { color:#166534; } .appno { font-family: ui-monospace, Consolas, monospace; font-size:20px; }
-  footer { text-align:center; color:var(--muted); font-size:12px; padding:20px; }
+  :root {
+    --ink:#14213d; --ink-2:#334155; --muted:#5b6678; --line:#d9dfe8; --line-2:#e8ecf2;
+    --bg:#eef2f7; --card:#ffffff; --brand:#0f4c81; --brand-2:#0b3a63; --brand-soft:#e7f0f9;
+    --accent:#e07a1f; --ok:#15803d; --ok-soft:#ecfdf3; --err:#b42318; --err-soft:#fef3f2;
+    --warn-bg:#fff4e0; --warn-ink:#8a3b06; --radius:10px;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 4px 14px rgba(16,24,40,.06);
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font-family:"Segoe UI","Nirmala UI",system-ui,-apple-system,sans-serif; color:var(--ink); background:var(--bg); font-size:15px; line-height:1.5; }
+  a { color:var(--brand); }
+  .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* mock banner */
+  .mock { background:repeating-linear-gradient(135deg,#fff4e0 0 14px,#ffedd0 14px 28px); color:var(--warn-ink); text-align:center; font-size:13px; padding:7px 16px; border-bottom:1px solid #f1cf9c; font-weight:700; letter-spacing:.01em; }
+
+  /* utility bar */
+  .util { background:var(--brand-2); color:#cfe0f1; font-size:12.5px; }
+  .util .wrap { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-top:6px; padding-bottom:6px; flex-wrap:wrap; }
+  .util nav { display:flex; gap:4px; flex-wrap:wrap; }
+  .util a, .util button { color:#e6eef7; text-decoration:none; background:none; border:0; font:inherit; padding:2px 8px; border-radius:4px; cursor:pointer; }
+  .util a:hover, .util button:hover { background:rgba(255,255,255,.1); }
+  .util .sep { opacity:.4; }
+
+  .wrap { max-width:1200px; margin:0 auto; padding-left:20px; padding-right:20px; }
+
+  /* header */
+  header.site { background:var(--card); border-bottom:1px solid var(--line); }
+  header.site .wrap { display:flex; align-items:center; gap:16px; padding-top:14px; padding-bottom:14px; }
+  .mark { width:50px; height:50px; flex:none; }
+  .brand h1 { font-size:21px; margin:0; letter-spacing:-.01em; color:var(--brand-2); }
+  .brand p { margin:1px 0 0; color:var(--muted); font-size:13px; }
+  .hdr-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+  .pill { font-size:12px; font-weight:600; color:var(--brand); background:var(--brand-soft); border:1px solid #c7dcf0; padding:5px 10px; border-radius:999px; white-space:nowrap; }
+  .tricolor { height:4px; background:linear-gradient(90deg,var(--accent) 0 33%,#ffffff 33% 66%,#2f8f4e 66%); border-bottom:1px solid var(--line); }
+
+  /* menu */
+  .menu { background:var(--brand); }
+  .menu .wrap { display:flex; gap:2px; overflow-x:auto; }
+  .menu a { color:#eaf2fb; text-decoration:none; font-size:14px; font-weight:600; padding:11px 14px; white-space:nowrap; border-bottom:3px solid transparent; }
+  .menu a:hover { background:rgba(255,255,255,.08); }
+  .menu a.on { border-bottom-color:var(--accent); background:rgba(255,255,255,.1); }
+
+  /* breadcrumb + title */
+  .crumbs { font-size:13px; color:var(--muted); padding:16px 0 4px; }
+  .crumbs ol { list-style:none; display:flex; flex-wrap:wrap; gap:6px; margin:0; padding:0; }
+  .crumbs li+li::before { content:"›"; margin-right:6px; color:#94a3b8; }
+  .crumbs a { text-decoration:none; } .crumbs a:hover { text-decoration:underline; }
+  .page-title { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:4px 0 18px; }
+  .page-title h2 { margin:0; font-size:26px; letter-spacing:-.015em; }
+  .page-title p { margin:4px 0 0; color:var(--muted); font-size:14px; }
+  .svc-meta { display:flex; gap:8px; flex-wrap:wrap; }
+  .svc-meta span { font-size:12.5px; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:5px 10px; color:var(--ink-2); }
+  .svc-meta b { color:var(--ink); }
+
+  /* layout */
+  .layout { display:grid; grid-template-columns:230px minmax(0,1fr) 280px; gap:22px; align-items:start; padding-bottom:40px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+
+  /* stages */
+  .stages { position:sticky; top:16px; padding:16px; }
+  .stages h3, .side h3 { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 12px; }
+  .stages ol { list-style:none; margin:0; padding:0; position:relative; }
+  .stages li { position:relative; padding:0 0 18px 38px; }
+  .stages li:last-child { padding-bottom:0; }
+  .stages li::after { content:""; position:absolute; left:13px; top:28px; bottom:2px; width:2px; background:var(--line); }
+  .stages li:last-child::after { display:none; }
+  .stages a { text-decoration:none; color:var(--ink-2); font-size:14px; font-weight:600; display:block; padding-top:3px; }
+  .stages small { display:block; color:var(--muted); font-weight:400; font-size:12px; }
+  .dot { position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%; border:2px solid var(--line); background:#fff; display:grid; place-items:center; font-size:12px; font-weight:700; color:var(--muted); transition:all .25s ease; }
+  .stages li.done .dot { background:var(--ok); border-color:var(--ok); color:#fff; }
+  .stages li.done::after { background:var(--ok); }
+  .stages li.done .dot .n { display:none; }
+  .stages li .dot .tick { display:none; }
+  .stages li.done .dot .tick { display:block; }
+  .stages li.current .dot { border-color:var(--brand); color:var(--brand); box-shadow:0 0 0 4px var(--brand-soft); }
+  .stages li.current a { color:var(--brand); }
+  .progress { margin-top:16px; padding-top:14px; border-top:1px solid var(--line-2); font-size:12.5px; color:var(--muted); }
+  .bar { height:6px; background:var(--line-2); border-radius:99px; overflow:hidden; margin-top:6px; }
+  .bar i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--brand),#2b7bc0); transition:width .35s ease; }
+
+  /* form */
+  .form-card { padding:0; overflow:hidden; }
+  .form-head { padding:18px 24px; border-bottom:1px solid var(--line-2); background:linear-gradient(180deg,#fbfcfe,#fff); }
+  .form-head h3 { margin:0; font-size:17px; }
+  .form-head p { margin:3px 0 0; color:var(--muted); font-size:13.5px; }
+  .req { color:var(--err); font-weight:700; }
+  fieldset { border:0; margin:0; padding:20px 24px 22px; border-bottom:1px solid var(--line-2); scroll-margin-top:16px; }
+  legend { padding:0; display:flex; align-items:center; gap:10px; font-size:15.5px; font-weight:700; color:var(--brand-2); margin-bottom:14px; float:left; width:100%; }
+  legend + * { clear:both; }
+  legend .num { width:24px; height:24px; border-radius:6px; background:var(--brand-soft); color:var(--brand); font-size:12.5px; display:grid; place-items:center; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 20px; }
+  .full { grid-column:1 / -1; }
+  .field label { display:block; font-size:13.5px; font-weight:600; margin-bottom:6px; color:var(--ink-2); }
+  .hint { display:block; font-size:12.5px; color:var(--muted); margin-top:5px; }
+  .err-msg { display:none; font-size:12.5px; color:var(--err); margin-top:5px; font-weight:600; }
+  .err-msg::before { content:"! "; }
+  .field.invalid .err-msg { display:block; }
+  .field.invalid .hint { display:none; }
+  input, select, textarea { width:100%; padding:10px 12px; border:1px solid #c5cdd9; border-radius:8px; font-size:15px; font-family:inherit; color:var(--ink); background:#fff; transition:border-color .15s, box-shadow .15s, background-color .2s; min-height:44px; }
+  textarea { resize:vertical; min-height:72px; }
+  select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235b6678' stroke-width='1.8'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:34px; }
+  input:hover, select:hover, textarea:hover { border-color:#9aa8bb; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(15,76,129,.18); }
+  .filled { background-color:#f2f8ff; border-color:#9cc0e4; }
+  .field.invalid input, .field.invalid select, .field.invalid textarea { border-color:var(--err); background-color:var(--err-soft); }
+  .prefix { position:relative; }
+  .prefix span { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14.5px; pointer-events:none; }
+  .prefix input { padding-left:28px; }
+  .prefix.wide input { padding-left:46px; }
+  .prefix.xwide input { padding-left:64px; letter-spacing:.08em; }
+
+  .decl-box { padding:20px 24px; }
+  .decl { display:flex; gap:12px; align-items:flex-start; background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
+  .decl input { width:20px; height:20px; min-height:0; margin:2px 0 0; flex:none; accent-color:var(--brand); cursor:pointer; }
+  .decl label { font-size:14px; color:var(--ink-2); cursor:pointer; }
+  .decl-wrap.invalid .decl { border-color:var(--err); background:var(--err-soft); }
+  .decl-wrap.invalid .err-msg { display:block; }
+
+  .actions { display:flex; gap:12px; align-items:center; padding:18px 24px 22px; background:#fbfcfe; border-top:1px solid var(--line-2); flex-wrap:wrap; }
+  .actions .note { margin-left:auto; font-size:12.5px; color:var(--muted); }
+  button { min-height:44px; padding:10px 22px; border-radius:8px; border:1px solid var(--brand); background:var(--brand); color:#fff; font-weight:700; font-size:15px; font-family:inherit; cursor:pointer; transition:background .15s, transform .05s, box-shadow .15s; display:inline-flex; align-items:center; gap:8px; }
+  button:hover { background:var(--brand-2); }
+  button:active { transform:translateY(1px); }
+  button:focus-visible, a:focus-visible { outline:3px solid #f59e0b; outline-offset:2px; }
+  button.secondary { background:#fff; color:var(--brand); }
+  button.secondary:hover { background:var(--brand-soft); }
+  button[disabled] { opacity:.7; cursor:progress; }
+  .spin { width:16px; height:16px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; display:none; }
+  button.busy .spin { display:inline-block; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .alert { display:none; margin:16px 24px 0; padding:12px 14px; border-radius:8px; background:var(--err-soft); border:1px solid #fecdca; color:var(--err); font-size:13.5px; font-weight:600; }
+  .alert.show { display:block; }
+
+  /* side info */
+  .side { display:flex; flex-direction:column; gap:16px; position:sticky; top:16px; }
+  .side .card { padding:16px 18px; }
+  .side ul { margin:0; padding:0; list-style:none; }
+  .side li { display:flex; gap:10px; font-size:13.5px; color:var(--ink-2); padding:7px 0; border-bottom:1px dashed var(--line-2); }
+  .side li:last-child { border-bottom:0; }
+  .side li svg { flex:none; margin-top:2px; color:var(--brand); }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:8px 12px; font-size:13.5px; }
+  .kv dt { color:var(--muted); } .kv dd { margin:0; font-weight:600; text-align:right; }
+  .help { background:var(--brand-soft) !important; border-color:#c7dcf0 !important; font-size:13.5px; color:var(--ink-2); }
+  .help b { color:var(--brand-2); }
+
+  /* acknowledgement */
+  #ok-view { padding:8px 0 48px; }
+  .ack { max-width:720px; margin:0 auto; animation:rise .45s ease both; }
+  @keyframes rise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+  .ack-top { text-align:center; padding:8px 0 22px; }
+  .ack-icon { width:68px; height:68px; border-radius:50%; background:var(--ok-soft); border:2px solid #a7e3bf; display:grid; place-items:center; margin:0 auto 12px; color:var(--ok); }
+  .ack-icon path { stroke-dasharray:30; stroke-dashoffset:30; animation:draw .5s .25s ease forwards; }
+  @keyframes draw { to { stroke-dashoffset:0; } }
+  .ack-top h2 { margin:0; font-size:25px; color:var(--ok); }
+  .ack-top p { margin:6px 0 0; color:var(--muted); }
+  .receipt { padding:0; overflow:hidden; position:relative; }
+  .receipt-head { background:var(--brand); color:#fff; padding:14px 22px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .receipt-head b { font-size:15px; } .receipt-head span { font-size:12.5px; opacity:.85; }
+  .receipt-body { padding:20px 22px; }
+  .appno-box { border:2px dashed #9cc0e4; background:#f5f9fe; border-radius:10px; padding:14px 16px; text-align:center; margin-bottom:18px; }
+  .appno-box small { display:block; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; }
+  .appno { font-family:ui-monospace,Consolas,"Cascadia Mono",monospace; font-size:24px; font-weight:700; color:var(--brand-2); letter-spacing:.04em; }
+  .rows { display:grid; grid-template-columns:1fr 1fr; gap:12px 20px; font-size:14px; }
+  .rows div small { display:block; color:var(--muted); font-size:12px; }
+  .rows div b, .rows div span { font-weight:600; }
+  .receipt-foot { border-top:1px dashed var(--line); padding:14px 22px; font-size:12.5px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; }
+  .stamp { position:absolute; right:22px; top:66px; transform:rotate(-12deg); border:2px solid rgba(21,128,61,.55); color:rgba(21,128,61,.7); font-weight:800; font-size:12px; letter-spacing:.12em; padding:4px 10px; border-radius:6px; }
+  .ack-actions { display:flex; gap:10px; justify-content:center; margin-top:18px; flex-wrap:wrap; }
+
+  /* footer */
+  footer.site { background:#0e2236; color:#b8c6d6; font-size:13px; margin-top:8px; }
+  footer.site .cols { display:grid; grid-template-columns:2fr 1fr 1fr; gap:24px; padding-top:28px; padding-bottom:20px; }
+  footer.site h4 { color:#fff; font-size:13px; margin:0 0 10px; text-transform:uppercase; letter-spacing:.06em; }
+  footer.site a { color:#d5e2f0; text-decoration:none; display:block; padding:2px 0; }
+  footer.site a:hover { text-decoration:underline; }
+  footer.site .base { border-top:1px solid rgba(255,255,255,.1); padding-top:12px; padding-bottom:16px; font-size:12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+
+  @media (max-width:1080px) {
+    .layout { grid-template-columns:200px minmax(0,1fr); }
+    .side { grid-column:1 / -1; position:static; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+  }
+  @media (max-width:760px) {
+    .wrap { padding-left:16px; padding-right:16px; }
+    .layout { grid-template-columns:minmax(0,1fr); }
+    .layout > * { min-width:0; }
+    .stages li { min-width:72px !important; flex:1 0 72px; }
+    .stages { position:static; }
+    .stages ol { display:flex; gap:6px; overflow-x:auto; }
+    .stages li { padding:34px 0 0; min-width:84px; text-align:center; }
+    .stages li::after { display:none; }
+    .stages .dot { left:50%; transform:translateX(-50%); }
+    .stages small { display:none; }
+    .stages a { font-size:12px; }
+    .grid, .rows { grid-template-columns:1fr; }
+    fieldset, .form-head, .decl-box, .actions { padding-left:16px; padding-right:16px; }
+    .actions .note { margin-left:0; width:100%; }
+    .hdr-right .pill:not(:first-child) { display:none; }
+    .page-title h2 { font-size:22px; }
+    footer.site .cols { grid-template-columns:1fr; }
+    .stamp { display:none; }
+  }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } .ack-icon path { stroke-dashoffset:0; } }
+  @media print { .mock, .util, header.site, .menu, .tricolor, footer.site, .ack-actions, .crumbs { display:none !important; } body { background:#fff; } }
 </style>
 </head>
 <body>
-<div class="mock">DEMONSTRATION PORTAL — NOT A GOVERNMENT WEBSITE. All data is synthetic. Built for the SAGE Seva prototype.</div>
-<header>
-  <div class="seal">SS</div>
-  <div><h1>Seva Sandbox Portal</h1><p>Citizen services · Revenue · Certificates (mock)</p></div>
+<a class="sr" href="#app-form">Skip to form</a>
+<div class="mock" role="note">DEMONSTRATION PORTAL — NOT A GOVERNMENT WEBSITE. All data is synthetic. Built for the SAGE Seva prototype.</div>
+
+<div class="util">
+  <div class="wrap">
+    <span>Seva Sandbox · fictional citizen-services demo</span>
+    <nav aria-label="Accessibility and language">
+      <a href="#app-form">Skip to main content</a><span class="sep">|</span>
+      <button type="button" aria-label="Decrease text size">A-</button>
+      <button type="button" aria-label="Default text size">A</button>
+      <button type="button" aria-label="Increase text size">A+</button><span class="sep">|</span>
+      <a href="#" lang="en">English</a><a href="#" lang="hi">हिन्दी</a><a href="#" lang="te">తెలుగు</a><a href="#" lang="ta">தமிழ்</a>
+    </nav>
+  </div>
+</div>
+
+<header class="site">
+  <div class="wrap">
+    <svg class="mark" viewBox="0 0 50 50" aria-hidden="true">
+      <rect x="1" y="1" width="48" height="48" rx="12" fill="#0f4c81"/>
+      <path d="M25 9 L39 16 V26 C39 34 32.5 39.5 25 42 C17.5 39.5 11 34 11 26 V16 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M19 25.5 L23.5 30 L31.5 21" fill="none" stroke="#f3a24f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="brand">
+      <h1>Seva Sandbox Portal</h1>
+      <p>Citizen e-services · Certificates · Revenue (mock)</p>
+    </div>
+    <div class="hdr-right">
+      <span class="pill">Guest session</span>
+      <span class="pill">Helpdesk: 1800-000-0000 (sample)</span>
+    </div>
+  </div>
 </header>
+<div class="tricolor" aria-hidden="true"></div>
+<nav class="menu" aria-label="Main">
+  <div class="wrap">
+    <a href="#">Home</a><a href="#" class="on" aria-current="page">Revenue Services</a><a href="#">Social Welfare</a><a href="#">Track Application</a><a href="#">Help</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <ol><li><a href="#">Home</a></li><li><a href="#">Revenue Services</a></li><li aria-current="page">Income Certificate</li></ol>
+  </nav>
+</div>
 
 <main id="form-view">
-  <h2>Application for Income Certificate</h2>
-  <div class="sub">Fill details exactly as in the attached identity document. Fields marked <span style="color:#b91c1c">*</span> are mandatory.</div>
-  <form id="app-form" autocomplete="off">
-    <div class="grid">
-      <div class="full"><label for="applicant_name">Applicant name (as in ID) <span class="req">*</span></label><input id="applicant_name" name="applicant_name" required></div>
-      <div class="full"><label for="father_name">Father's / spouse name <span class="req">*</span></label><input id="father_name" name="father_name" required></div>
-      <div><label for="dob">Date of birth (DD/MM/YYYY) <span class="req">*</span></label><input id="dob" name="dob" required></div>
-      <div><label for="gender">Gender <span class="req">*</span></label>
-        <select id="gender" name="gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-      <div class="full"><label for="address">Address <span class="req">*</span></label><textarea id="address" name="address" rows="2" required></textarea></div>
-      <div><label for="district">District <span class="req">*</span></label><input id="district" name="district" required></div>
-      <div><label for="state">State <span class="req">*</span></label><input id="state" name="state" required></div>
-      <div><label for="id_last4">ID number (last 4 digits only) <span class="req">*</span></label><input id="id_last4" name="id_last4" maxlength="4" required></div>
-      <div><label for="mobile">Mobile number</label><input id="mobile" name="mobile" maxlength="10"></div>
-      <div><label for="occupation">Occupation <span class="req">*</span></label><input id="occupation" name="occupation" required></div>
-      <div><label for="annual_income">Annual family income (₹) <span class="req">*</span></label><input id="annual_income" name="annual_income" required></div>
-      <div class="full"><label for="purpose">Purpose of certificate <span class="req">*</span></label><input id="purpose" name="purpose" required></div>
+  <div class="wrap">
+    <div class="page-title">
+      <div>
+        <h2>Application for Income Certificate</h2>
+        <p>Fill details exactly as in your identity document. Fields marked <span class="req">*</span> are mandatory.</p>
+      </div>
+      <div class="svc-meta"><span>Service code <b>RV-IC-01</b></span><span>Fee <b>₹0 (sample)</b></span></div>
     </div>
-    <div class="decl"><input type="checkbox" id="declaration" required><label for="declaration" style="font-weight:400">I declare that the information given is true to the best of my knowledge.</label></div>
-    <div class="actions">
-      <button type="submit" id="submit-btn">Submit application</button>
-      <button type="reset" class="secondary">Clear</button>
+
+    <div class="layout">
+      <aside class="card stages" aria-label="Application stages">
+        <h3>Application stages</h3>
+        <ol id="stages">
+          <li data-sec="sec-applicant"><span class="dot"><span class="n">1</span><svg class="tick" width="14" height="14" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><a href="#sec-applicant">Applicant details<small>Name, DOB, ID</small></a></li>
+          <li data-sec="sec-address"><span class="dot"><span class="n">2</span><svg class="tick" width="14" height="14" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><a href="#sec-address">Address<small>Residence &amp; contact</small></a></li>
+          <li data-sec="sec-income"><span class="dot"><span class="n">3</span><svg class="tick" width="14" height="14" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><a href="#sec-income">Income details<small>Occupation, income</small></a></li>
+          <li data-sec="sec-decl"><span class="dot"><span class="n">4</span><svg class="tick" width="14" height="14" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><a href="#sec-decl">Declaration<small>Self-attestation</small></a></li>
+          <li data-sec="submit"><span class="dot"><span class="n">5</span><svg class="tick" width="14" height="14" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><a href="#submit-btn">Submit<small>Get application no.</small></a></li>
+        </ol>
+        <div class="progress"><span id="prog-txt">0 of 11 required fields complete</span><div class="bar"><i id="prog-bar"></i></div></div>
+      </aside>
+
+      <div class="card form-card">
+        <div class="form-head">
+          <h3>Income Certificate — new application</h3>
+          <p>Takes about 3 minutes. Your progress is not saved if you leave this page.</p>
+        </div>
+        <div class="alert" id="form-alert" role="alert"></div>
+        <form id="app-form" autocomplete="off" novalidate>
+          <fieldset id="sec-applicant">
+            <legend><span class="num">1</span>Applicant details</legend>
+            <div class="grid">
+              <div class="field full"><label for="applicant_name">Applicant name (as in ID) <span class="req">*</span></label>
+                <input id="applicant_name" name="applicant_name" required aria-describedby="h-name">
+                <span class="hint" id="h-name">Spelling must match your identity document exactly.</span><span class="err-msg">Enter the applicant's name.</span></div>
+              <div class="field full"><label for="father_name">Father's / spouse name <span class="req">*</span></label>
+                <input id="father_name" name="father_name" required>
+                <span class="hint">As printed on the ID, if shown.</span><span class="err-msg">Enter father's or spouse name.</span></div>
+              <div class="field"><label for="dob">Date of birth <span class="req">*</span></label>
+                <input id="dob" name="dob" required placeholder="DD/MM/YYYY" inputmode="numeric">
+                <span class="hint">Format: DD/MM/YYYY</span><span class="err-msg">Enter date of birth.</span></div>
+              <div class="field"><label for="gender">Gender <span class="req">*</span></label>
+                <select id="gender" name="gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+                <span class="err-msg">Select a gender.</span></div>
+              <div class="field"><label for="id_last4">ID number (last 4 digits only) <span class="req">*</span></label>
+                <div class="prefix xwide"><span>XXXX –</span><input id="id_last4" name="id_last4" maxlength="4" required inputmode="numeric"></div>
+                <span class="hint">Never enter your full ID number here.</span><span class="err-msg">Enter the last 4 digits of your ID.</span></div>
+            </div>
+          </fieldset>
+
+          <fieldset id="sec-address">
+            <legend><span class="num">2</span>Address &amp; contact</legend>
+            <div class="grid">
+              <div class="field full"><label for="address">Residential address <span class="req">*</span></label>
+                <textarea id="address" name="address" rows="2" required></textarea>
+                <span class="hint">House no., street, village / town.</span><span class="err-msg">Enter your address.</span></div>
+              <div class="field"><label for="district">District <span class="req">*</span></label>
+                <input id="district" name="district" required><span class="err-msg">Enter district.</span></div>
+              <div class="field"><label for="state">State <span class="req">*</span></label>
+                <input id="state" name="state" required><span class="err-msg">Enter state.</span></div>
+              <div class="field"><label for="mobile">Mobile number <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+                <div class="prefix wide"><span>+91</span><input id="mobile" name="mobile" maxlength="10" inputmode="tel"></div>
+                <span class="hint">For SMS status updates.</span></div>
+            </div>
+          </fieldset>
+
+          <fieldset id="sec-income">
+            <legend><span class="num">3</span>Income details</legend>
+            <div class="grid">
+              <div class="field"><label for="occupation">Occupation <span class="req">*</span></label>
+                <input id="occupation" name="occupation" required>
+                <span class="hint">e.g. Farmer, Daily wage worker, Teacher</span><span class="err-msg">Enter occupation.</span></div>
+              <div class="field"><label for="annual_income">Annual family income <span class="req">*</span></label>
+                <div class="prefix"><span>₹</span><input id="annual_income" name="annual_income" required inputmode="numeric"></div>
+                <span class="hint">Total income of all family members, per year.</span><span class="err-msg">Enter annual family income.</span></div>
+              <div class="field full"><label for="purpose">Purpose of certificate <span class="req">*</span></label>
+                <input id="purpose" name="purpose" required>
+                <span class="hint">e.g. Scholarship, fee reimbursement, welfare scheme.</span><span class="err-msg">Enter the purpose.</span></div>
+            </div>
+          </fieldset>
+
+          <div class="decl-box" id="sec-decl">
+            <legend style="float:none;margin-bottom:12px"><span class="num">4</span>Declaration</legend>
+            <div class="decl-wrap" id="decl-wrap">
+              <div class="decl"><input type="checkbox" id="declaration" required><label for="declaration">I declare that the information given above is true to the best of my knowledge, and I understand that false information may lead to rejection.</label></div>
+              <span class="err-msg">Please accept the declaration to continue.</span>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="submit-btn"><span class="spin" aria-hidden="true"></span>Submit application</button>
+            <button type="reset" class="secondary">Clear form</button>
+            <span class="note">Mock portal — nothing is sent to any government system.</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="side">
+        <section class="card" aria-labelledby="docs-h">
+          <h3 id="docs-h">Documents required</h3>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="1.5" width="11" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h6M5 12h3" stroke="currentColor" stroke-width="1.5"/></svg>Identity proof (any govt-issued photo ID)</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="1.5" width="11" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h6M5 12h3" stroke="currentColor" stroke-width="1.5"/></svg>Address proof (ration card / utility bill)</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="1.5" width="11" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h6M5 12h3" stroke="currentColor" stroke-width="1.5"/></svg>Income self-declaration or employer letter</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="1.5" width="11" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h6M5 12h3" stroke="currentColor" stroke-width="1.5"/></svg>Passport-size photograph</li>
+          </ul>
+        </section>
+        <section class="card" aria-labelledby="svc-h">
+          <h3 id="svc-h">Service details</h3>
+          <dl class="kv">
+            <dt>Processing time</dt><dd>~7–15 days (sample)</dd>
+            <dt>Validity</dt><dd>1 year (sample)</dd>
+            <dt>Issued by</dt><dd>Revenue office (fictional)</dd>
+            <dt>Delivery</dt><dd>Digital download</dd>
+          </dl>
+        </section>
+        <section class="card help">
+          <b>Need help?</b><br>Keep your documents ready before you start. You can track your application with the number shown after submission.
+        </section>
+      </div>
     </div>
-  </form>
+  </div>
 </main>
 
-<div class="ok" id="ok-view" style="display:none">
-  <h2>Application submitted</h2>
-  <p>Application number: <span class="appno" id="appno"></span></p>
-  <p>Applicant: <b id="ok-name"></b></p>
-  <p style="color:#5b6475;font-size:13px">This is a mock acknowledgement from the demonstration portal.</p>
+<div id="ok-view" style="display:none">
+  <div class="wrap">
+    <div class="ack">
+      <div class="ack-top">
+        <div class="ack-icon"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M8 17.5l6 6 12-13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2>Application submitted</h2>
+        <p>Your application has been received. Keep the application number for tracking.</p>
+      </div>
+      <div class="card receipt" role="region" aria-label="Acknowledgement receipt">
+        <div class="receipt-head"><b>Acknowledgement receipt</b><span>Seva Sandbox Portal · Income Certificate</span></div>
+        <div class="stamp">RECEIVED</div>
+        <div class="receipt-body">
+          <div class="appno-box"><small>Application number</small><span class="appno" id="appno"></span></div>
+          <div class="rows">
+            <div><small>Applicant</small><b id="ok-name"></b></div>
+            <div><small>Service</small><span>Income Certificate</span></div>
+            <div><small>Submitted on</small><span id="ok-time"></span></div>
+            <div><small>Expected processing</small><span>~7–15 days (sample)</span></div>
+            <div><small>Purpose</small><span id="ok-purpose"></span></div>
+            <div><small>Status</small><span style="color:var(--ok)">Received — pending verification</span></div>
+          </div>
+        </div>
+        <div class="receipt-foot"><span>This is a mock acknowledgement from a demonstration portal. It has no legal value.</span></div>
+      </div>
+      <div class="ack-actions">
+        <button type="button" onclick="window.print()">Print receipt</button>
+        <button type="button" class="secondary" onclick="location.reload()">Start a new application</button>
+      </div>
+    </div>
+  </div>
 </div>
-<footer>Seva Sandbox Portal · mock service for the SAGE Seva prototype</footer>
+
+<footer class="site">
+  <div class="wrap cols">
+    <div><h4>Seva Sandbox Portal</h4><p style="margin:0">A fictional citizen-services portal used to demonstrate the SAGE Seva voice assistant. It is not affiliated with any government. All data is synthetic.</p></div>
+    <div><h4>Services</h4><a href="#">Income Certificate</a><a href="#">Track Application</a><a href="#">Help &amp; FAQ</a></div>
+    <div><h4>Policies</h4><a href="#">Accessibility</a><a href="#">Privacy (demo)</a><a href="#">Terms (demo)</a></div>
+  </div>
+  <div class="wrap base"><span>© Seva Sandbox (demonstration only)</span><span>Mock service for the SAGE Seva prototype</span></div>
+</footer>
 
 <script>
-  document.querySelectorAll("input,select,textarea").forEach(el =>
-    el.addEventListener("input", () => el.classList.toggle("filled", !!el.value)));
-  document.getElementById("app-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target).entries());
-    const r = await fetch("/portal/api/submit", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data) });
-    const j = await r.json();
-    document.getElementById("form-view").style.display = "none";
-    document.getElementById("ok-view").style.display = "block";
-    document.getElementById("appno").textContent = j.application_no;
-    document.getElementById("ok-name").textContent = data.applicant_name;
+  const form = document.getElementById("app-form");
+  const fields = Array.from(form.querySelectorAll("input:not([type=checkbox]),select,textarea"));
+  const required = fields.filter(el => el.required);
+  const decl = document.getElementById("declaration");
+  const sections = { "sec-applicant": [], "sec-address": [], "sec-income": [] };
+  required.forEach(el => { const fs = el.closest("fieldset"); if (fs && sections[fs.id]) sections[fs.id].push(el); });
+
+  function fieldOf(el) { return el.closest(".field"); }
+  function refresh() {
+    const done = required.filter(el => el.value.trim()).length;
+    document.getElementById("prog-txt").textContent = done + " of " + required.length + " required fields complete";
+    document.getElementById("prog-bar").style.width = Math.round(100 * done / required.length) + "%";
+    let currentSet = false;
+    document.querySelectorAll("#stages li").forEach(li => {
+      const id = li.dataset.sec;
+      let ok;
+      if (sections[id]) ok = sections[id].every(el => el.value.trim());
+      else if (id === "sec-decl") ok = decl.checked;
+      else ok = false;
+      li.classList.toggle("done", ok);
+      li.classList.toggle("current", !ok && !currentSet);
+      if (!ok) currentSet = true;
+    });
+  }
+
+  document.querySelectorAll("input,select,textarea").forEach(el => {
+    const h = () => {
+      if (el.type !== "checkbox") el.classList.toggle("filled", !!el.value);
+      const f = fieldOf(el); if (f && el.value.trim()) f.classList.remove("invalid");
+      if (el === decl && decl.checked) document.getElementById("decl-wrap").classList.remove("invalid");
+      refresh();
+    };
+    el.addEventListener("input", h); el.addEventListener("change", h);
   });
+  form.addEventListener("reset", () => setTimeout(() => {
+    fields.forEach(el => { el.classList.remove("filled"); const f = fieldOf(el); if (f) f.classList.remove("invalid"); });
+    document.getElementById("decl-wrap").classList.remove("invalid");
+    document.getElementById("form-alert").classList.remove("show");
+    refresh();
+  }));
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const alertBox = document.getElementById("form-alert");
+    const missing = required.filter(el => !el.value.trim());
+    missing.forEach(el => fieldOf(el).classList.add("invalid"));
+    document.getElementById("decl-wrap").classList.toggle("invalid", !decl.checked);
+    if (missing.length || !decl.checked) {
+      const n = missing.length + (decl.checked ? 0 : 1);
+      alertBox.textContent = "Please fix " + n + " item" + (n > 1 ? "s" : "") + " highlighted below before submitting.";
+      alertBox.classList.add("show");
+      (missing[0] || decl).focus();
+      return;
+    }
+    alertBox.classList.remove("show");
+    const btn = document.getElementById("submit-btn");
+    btn.disabled = true; btn.classList.add("busy");
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    try {
+      const r = await fetch("/portal/api/submit", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data) });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json();
+      document.getElementById("form-view").style.display = "none";
+      document.getElementById("ok-view").style.display = "block";
+      document.getElementById("appno").textContent = j.application_no;
+      document.getElementById("ok-name").textContent = data.applicant_name;
+      document.getElementById("ok-purpose").textContent = data.purpose || "—";
+      document.getElementById("ok-time").textContent = new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+      window.scrollTo(0, 0);
+    } catch (err) {
+      alertBox.textContent = "Could not submit right now (" + err.message + "). Please try again.";
+      alertBox.classList.add("show");
+    } finally {
+      btn.disabled = false; btn.classList.remove("busy");
+    }
+  });
+  refresh();
 </script>
 </body>
 </html>

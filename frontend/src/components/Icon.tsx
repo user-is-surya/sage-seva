@@ -15,6 +15,12 @@ const P: Record<string, string> = {
   text: "M4 7V5h10v2M9 5v14M7 19h4M14 12v-1h6v1M17 11v8M15.5 19h3",
   plus: "M12 5v14M5 12h14",
   shield: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
+  vol: "M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12",
+  volOff: "M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6",
+  skip: "M6 5l9 7-9 7zM18 5v14",
+  x: "M6 6l12 12M18 6L6 18",
+  send: "M4 12h15M13 6l6 6-6 6",
+  arrow: "M5 12h14M13 6l6 6-6 6",
 };
 
 export default function Icon({ name, size = 18, label }: { name: keyof typeof P | string; size?: number; label?: string }) {

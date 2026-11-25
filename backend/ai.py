@@ -80,7 +80,7 @@ def _parse_json(text: str):
 
 
 # ---------------------------------------------------------------- text / JSON
-def ask_json(system: str, user: str, images: list[tuple[bytes, str]] | None = None) -> dict:
+def ask_json(system: str, user: str, images: list[tuple[bytes, str]] | None = None, temperature: float = 0.2) -> dict:
     """Return a JSON object. Images force Gemini (Groq path is text-only)."""
     errors = []
     for model in _gemini_chain():
@@ -95,7 +95,7 @@ def ask_json(system: str, user: str, images: list[tuple[bytes, str]] | None = No
                 config=types.GenerateContentConfig(
                     system_instruction=system,
                     response_mime_type="application/json",
-                    temperature=0.2,
+                    temperature=temperature,
                 ),
             )
             last_used["text"] = f"gemini:{model}"
@@ -112,7 +112,7 @@ def ask_json(system: str, user: str, images: list[tuple[bytes, str]] | None = No
                 messages=[{"role": "system", "content": system + "\nReply with one JSON object only."},
                           {"role": "user", "content": user}],
                 response_format={"type": "json_object"},
-                temperature=0.2,
+                temperature=temperature,
             )
             last_used["text"] = f"groq:{config.GROQ_TEXT_MODEL}"
             return _parse_json(resp.choices[0].message.content)

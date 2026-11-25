@@ -5,8 +5,15 @@ async function j<T = any>(url: string, body?: unknown): Promise<T> {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
   });
   const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((data as any).error || `HTTP ${r.status}`);
+  if (!r.ok) throw new Error(friendly((data as any).error, r.status));
   return data as T;
+}
+
+export function friendly(msg: unknown, status?: number): string {
+  const s = typeof msg === "string" ? msg : "";
+  if (s && s.length < 240 && !/Traceback|File "|Exception|\bat \w+\.|Error:/.test(s)) return s;
+  if (status && status >= 500) return "Something went wrong on our side. Please try again.";
+  return "That didn't work. Please try again.";
 }
 
 export const api = {
@@ -27,8 +34,8 @@ export const api = {
     fd.append("audio", blob, "speech.webm");
     fd.append("lang", lang);
     const r = await fetch("/api/stt", { method: "POST", body: fd });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || "speech-to-text failed");
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(friendly(data.error || "I couldn't hear that. Please try again.", r.status));
     return data as { text: string; engine: string };
   },
 
@@ -37,33 +44,68 @@ export const api = {
     fd.append("image", file, name);
     fd.append("lang", lang);
     const r = await fetch("/api/extract", { method: "POST", body: fd });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || "could not read document");
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(friendly(data.error || "Could not read this document.", r.status));
     return data;
   },
 };
 
 // ---------------------------------------------------------------- voice out
 let current: HTMLAudioElement | null = null;
+let finishCurrent: (() => void) | null = null;
+let speakToken = 0;
+const MUTE_KEY = "seva.muted";
+export let muted = (() => { try { return localStorage.getItem(MUTE_KEY) === "1"; } catch { return false; } })();
+export function setMuted(v: boolean) {
+  muted = v;
+  try { localStorage.setItem(MUTE_KEY, v ? "1" : "0"); } catch { /* ignore */ }
+  if (v) stopSpeaking();
+}
+
+/** Stop any voice output immediately (server audio, pending fetch, browser voice). */
+export function stopSpeaking() {
+  speakToken++;
+  try { current?.pause(); } catch { /* ignore */ }
+  current = null;
+  try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
+  const f = finishCurrent; finishCurrent = null; f?.();
+}
+
+/** Speak a short line. Resolves when finished OR stopped. Returns engine name ("" if skipped). */
 export async function speak(text: string, lang: Lang): Promise<string> {
-  if (!text) return "";
-  current?.pause();
+  if (!text || muted) return "";
+  stopSpeaking();
+  const my = ++speakToken;
   try {
     const r = await fetch("/api/tts", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, lang }),
     });
     if (!r.ok) throw new Error("tts unavailable");
     const engine = r.headers.get("X-TTS-Engine") || "server";
-    const url = URL.createObjectURL(await r.blob());
-    current = new Audio(url);
-    await new Promise<void>((res) => { current!.onended = () => res(); current!.onerror = () => res(); current!.play().catch(() => res()); });
+    const blob = await r.blob();
+    if (my !== speakToken || muted) return "";
+    const url = URL.createObjectURL(blob);
+    const a = new Audio(url);
+    current = a;
+    await new Promise<void>((res) => {
+      finishCurrent = res;
+      a.onended = () => res(); a.onerror = () => res();
+      a.play().catch(() => res());
+    });
+    finishCurrent = null;
+    URL.revokeObjectURL(url);
     return engine;
   } catch {
-    // last resort: the browser's own voice
+    if (my !== speakToken || muted || !("speechSynthesis" in window)) return "";
     const u = new SpeechSynthesisUtterance(text);
     u.lang = { te: "te-IN", ta: "ta-IN", hi: "hi-IN", en: "en-IN" }[lang];
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
+    await new Promise<void>((res) => {
+      finishCurrent = res;
+      u.onend = () => res(); u.onerror = () => res();
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    });
+    finishCurrent = null;
     return "browser";
   }
 }

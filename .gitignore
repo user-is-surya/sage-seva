@@ -7,3 +7,5 @@ dist/
 data/
 *.log
 .DS_Store
+data_test*/
+data_server.log

@@ -38,6 +38,15 @@ _DIGIT_WORDS = {
     "సున్నా": 0, "ఒకటి": 1, "రెండు": 2, "మూడు": 3, "నాలుగు": 4, "ఐదు": 5, "ఆరు": 6, "ఏడు": 7, "ఎనిమిది": 8, "తొమ్మిది": 9,
     "பூஜ்ஜியம்": 0, "ஒன்று": 1, "இரண்டு": 2, "மூன்று": 3, "நான்கு": 4, "ஐந்து": 5, "ஆறு": 6, "ஏழு": 7, "எட்டு": 8, "ஒன்பது": 9,
     "शून्य": 0, "एक": 1, "दो": 2, "तीन": 3, "चार": 4, "पांच": 5, "पाँच": 5, "छह": 6, "छः": 6, "सात": 7, "आठ": 8, "नौ": 9,
+    # common spoken / STT variants
+    "oh": 0, "zero.": 0, "ఒక్కటి": 1, "ఒకట": 1, "అయిదు": 5, "తొమ్మిద": 9,
+    "ஒண்ணு": 1, "ரெண்டு": 2, "மூணு": 3, "நாலு": 4, "அஞ்சு": 5, "ஒம்போது": 9,
+    "छे": 6, "छह.": 6, "सुन्ना": 0,
+    # romanised Telugu / Tamil / Hindi
+    "sunna": 0, "okati": 1, "rendu": 2, "moodu": 3, "mudu": 3, "naalugu": 4, "nalugu": 4, "aidu": 5, "aaru": 6,
+    "edu": 7, "yedu": 7, "enimidi": 8, "tommidi": 9, "ondru": 1, "irandu": 2, "moondru": 3, "naangu": 4,
+    "ainthu": 5, "anju": 5, "ezhu": 7, "ettu": 8, "onbathu": 9, "ek": 1, "do": 2, "teen": 3, "char": 4, "paanch": 5,
+    "chhe": 6, "saat": 7, "aath": 8, "nau": 9,
 }
 _NATIVE_DIGITS = str.maketrans("౦౧౨౩౪౫౬౭౮౯०१२३४५६७८९௦௧௨௩௪௫௬௭௮௯", "012345678901234567890123456789")
 
@@ -66,12 +75,19 @@ def challenge(action: str, payload: dict, summary: dict) -> dict:
 def extract_digits(heard: str) -> str:
     s = (heard or "").translate(_NATIVE_DIGITS).lower()
     out = []
-    for tok in re.findall(r"\d|[^\s\d,.\-]+", s):
+    for tok in re.findall(r"\d|[^\s\d,.\-।:;!?\"'()]+", s):
         if tok.isdigit():
             out.append(tok)
         elif tok in _DIGIT_WORDS:
             out.append(str(_DIGIT_WORDS[tok]))
     return "".join(out)
+
+
+def release(cid: str) -> None:
+    """The consented action could not be carried out (portal refused): let the same code be retried."""
+    p = _pending.get(cid)
+    if p:
+        p["used"] = False
 
 
 def verify(cid: str, heard: str, action: str, payload: dict, method: str) -> dict:
