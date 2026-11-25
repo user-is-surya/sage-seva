@@ -15,7 +15,7 @@ const VERDICT: Record<string, { label: string; cls: string }> = {
 };
 
 export default function App() {
-  const [lang, setLang] = useState<Lang>("te");
+  const [lang, setLang] = useState<Lang>("en");
   const [big, setBig] = useState(false);
   const [voice, setVoice] = useState<VoiceState>("armed");
   const [level, setLevel] = useState(0);
@@ -56,7 +56,7 @@ export default function App() {
   async function readDocs(files: { blob: Blob; name: string; thumb: string }[]) {
     setReading(files.length);
     const out: Doc[] = [...docs];
-    for (const f of files) {
+    await Promise.all(files.map(async (f) => {
       try {
         const d = await api.extract(f.blob, f.name, lang);
         out.push({ ...d, thumb: f.thumb, file: f.name });
@@ -65,7 +65,7 @@ export default function App() {
         setMsgs((m) => [...m, { who: "seva", text: `⚠ ${f.name}: ${e.message}` }]);
       }
       setReading((r) => r - 1);
-    }
+    }));
     refreshAudit();
     if (out.length) {
       const g = await api.reconcile(out, lang);

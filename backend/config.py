@@ -69,9 +69,12 @@ def gemini_models() -> dict:
         except Exception as e:  # noqa: BLE001
             available = [f"ERROR listing models: {e}"]
     good = [a for a in available if not a.startswith("ERROR")]
+    ranked = [a for a in sorted(good, key=_rank_text, reverse=True) if _rank_text(a)[0] and "flash" in a]
+    chain = ([text] if text else []) + [a for a in ranked if a != text]
     if not text and good:
-        text = sorted(good, key=_rank_text, reverse=True)[0]
+        text = (ranked or sorted(good, key=_rank_text, reverse=True))[0]
     if not tts:
         tts_c = [a for a in good if "tts" in a.lower()]
         tts = sorted(tts_c, key=_rank_tts, reverse=True)[0] if tts_c else ""
-    return {"text": text or "gemini-flash-latest", "tts": tts or None, "available": available}
+    chain = chain or [text or "gemini-flash-latest"]
+    return {"text": chain[0], "chain": chain[:6], "tts": tts or None, "available": available}

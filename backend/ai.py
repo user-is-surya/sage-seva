@@ -29,16 +29,42 @@ def _fail(p: str) -> None:
     _cooldown[p] = time.time() + COOLDOWN_S
 
 
-def _gemini():
-    from google import genai
+_clients: dict = {}
 
-    return genai.Client(api_key=config.GEMINI_API_KEY)
+
+def _gemini():
+    # One long-lived client: a temporary one can be garbage-collected (and its
+    # HTTP session closed) while its request is still in flight.
+    if "gemini" not in _clients:
+        from google import genai
+        from google.genai import types
+
+        # 25 s per attempt: an overloaded model should fail over, not hang the demo
+        _clients["gemini"] = genai.Client(api_key=config.GEMINI_API_KEY,
+                                          http_options=types.HttpOptions(timeout=25_000))
+    return _clients["gemini"]
 
 
 def _groq():
-    from groq import Groq
+    if "groq" not in _clients:
+        from groq import Groq
 
-    return Groq(api_key=config.GROQ_API_KEY)
+        _clients["groq"] = Groq(api_key=config.GROQ_API_KEY)
+    return _clients["groq"]
+
+
+def _gemini_chain() -> list[str]:
+    """Gemini models to try in order, skipping ones on cooldown (overloaded / over quota)."""
+    if not config.GEMINI_API_KEY:
+        return []
+    return [m for m in config.gemini_models()["chain"] if _ok("g:" + m)]
+
+
+def _fail_model(model: str, e: Exception) -> None:
+    s = str(e)
+    if any(k in s.lower() for k in ("429", "resource_exhausted", "503", "unavailable", "500", "404", "not_found",
+                                     "timeout", "timed out", "deadline")):
+        _fail("g:" + model)
 
 
 def _parse_json(text: str):
@@ -57,11 +83,10 @@ def _parse_json(text: str):
 def ask_json(system: str, user: str, images: list[tuple[bytes, str]] | None = None) -> dict:
     """Return a JSON object. Images force Gemini (Groq path is text-only)."""
     errors = []
-    if config.GEMINI_API_KEY and _ok("gemini"):
+    for model in _gemini_chain():
         try:
             from google.genai import types
 
-            model = config.gemini_models()["text"]
             parts = [types.Part.from_bytes(data=b, mime_type=mt) for b, mt in (images or [])]
             parts.append(types.Part.from_text(text=user))
             resp = _gemini().models.generate_content(
@@ -76,9 +101,8 @@ def ask_json(system: str, user: str, images: list[tuple[bytes, str]] | None = No
             last_used["text"] = f"gemini:{model}"
             return _parse_json(resp.text)
         except Exception as e:  # noqa: BLE001
-            errors.append(f"gemini: {e}")
-            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e) or "503" in str(e):
-                _fail("gemini")
+            errors.append(f"{model}: {str(e)[:160]}")
+            _fail_model(model, e)
     if images:
         raise RuntimeError("Vision needs Gemini, which is unavailable: " + "; ".join(errors))
     if config.GROQ_API_KEY and _ok("groq"):
@@ -109,11 +133,10 @@ STT_PROMPT = (
 def transcribe(audio: bytes, mime: str, lang: str) -> dict:
     lname = config.LANGS.get(lang, config.LANGS["en"])["name"]
     errors = []
-    if config.GEMINI_API_KEY and _ok("gemini"):
+    for model in _gemini_chain()[:3]:
         try:
             from google.genai import types
 
-            model = config.gemini_models()["text"]
             resp = _gemini().models.generate_content(
                 model=model,
                 contents=[types.Content(role="user", parts=[
@@ -125,9 +148,8 @@ def transcribe(audio: bytes, mime: str, lang: str) -> dict:
             last_used["stt"] = f"gemini:{model}"
             return {"text": (resp.text or "").strip(), "engine": last_used["stt"]}
         except Exception as e:  # noqa: BLE001
-            errors.append(f"gemini: {e}")
-            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-                _fail("gemini")
+            errors.append(f"{model}: {str(e)[:160]}")
+            _fail_model(model, e)
     if config.GROQ_API_KEY and _ok("groq-stt"):
         try:
             ext = "webm" if "webm" in (mime or "") else "wav"

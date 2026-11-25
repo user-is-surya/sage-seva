@@ -110,8 +110,16 @@ Classify the user's utterance and extract details. Return JSON:
  "digits": "<any code digits the user spoke, as digits only, else empty>",
  "reply": "<a short, warm spoken reply in {lang} script (1-2 sentences), telling the user what happens next>"
 }}
-Rules: never invent personal details. Convert spoken amounts to plain integers (e.g. 'oka lakh iravai velu' -> 120000).
-If the user asks to submit, intent is "submit" (the app will ask for a consent code separately).
+Rules:
+- Never invent personal details. Convert spoken amounts to plain integers (e.g. 'oka lakh iravai velu' -> 120000).
+- Slot values go into an English-language government form: write them in ENGLISH (e.g. 'రైతు' -> 'Farmer',
+  'बेटी की scholarship' -> 'Scholarship for daughter'), with a capital first letter.
+- The app's steps are only: read document photos -> check names -> collect details -> fill the form and read it back
+  -> ask for a spoken consent code -> submit -> show an application number. Never mention OTPs, payments, SMS,
+  visits to an office or any step not in this list.
+- If details are still missing (occupation, annual income, purpose), ask for the missing one. If documents are not
+  added yet, ask the user to show their document photos. If everything is ready, offer to fill the form.
+- If the user asks to submit, intent is "submit" (the app will ask for a consent code separately).
 """
 
 
