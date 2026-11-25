@@ -24,7 +24,7 @@ from rapidfuzz import fuzz
 
 # ------------------------------------------------------------------ keys
 _ABBREV = {"mohd": "mohammed", "md": "mohammed", "mohamed": "mohammed", "muhammad": "mohammed",
-           "smt": "", "sri": "", "shri": "", "kum": "", "dr": ""}
+           "kr": "kumar", "smt": "", "sri": "", "shri": "", "kum": "", "dr": ""}
 
 _RULES = [
     (r"x", "ks"), (r"q", "k"), (r"ph", "f"), (r"w", "v"), (r"(?<=[aeiou])z", "j"),
@@ -56,6 +56,31 @@ def _split_initials(name: str) -> tuple[list[str], list[str]]:
     return full, initials
 
 
+def _skeleton(key: str) -> str:
+    return re.sub(r"[aeiou]", "", key)
+
+
+def _words_align(fa: list[str], fb: list[str]) -> bool:
+    ka = [phonetic_key(t) for t in fa]
+    kb = [phonetic_key(t) for t in fb]
+    used = set()
+    for x in ka:
+        best, bi = -1, None
+        for i, y in enumerate(kb):
+            if i not in used and fuzz.ratio(x, y) > best:
+                best, bi = fuzz.ratio(x, y), i
+        if bi is None:
+            return False
+        used.add(bi)
+        y = kb[bi]
+        if not x or not y or x[0] != y[0]:
+            return False
+        sx, sy = _skeleton(x), _skeleton(y)
+        if not (sx == sy or (best >= 90 and fuzz.ratio(sx, sy) >= 80)):
+            return False
+    return True
+
+
 def compare(a: str, b: str) -> dict:
     """Compare two Latin-script spellings of a name."""
     if a.strip().lower() == b.strip().lower():
@@ -83,6 +108,12 @@ def compare(a: str, b: str) -> dict:
         if inits_ok and core >= 90:
             return {"verdict": "initial_vs_full", "score": int(core)}
     if score >= 88:
+        # Guard against merging different people with similar names
+        # (Rajesh/Rakesh, Arun/Varun, Kavitha/Kavya): with the same word count,
+        # every word must start with the same sound and keep its consonant
+        # skeleton; otherwise a human must check.
+        if len(fa) == len(fb) and not _words_align(fa, fb):
+            return {"verdict": "possible_match_check", "score": int(score)}
         return {"verdict": "same_name_different_spelling", "score": int(score)}
     if score >= 75:
         return {"verdict": "possible_match_check", "score": int(score)}
